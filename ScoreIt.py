@@ -1,5 +1,5 @@
 __author__ = 'FiftysixTimes7(PTJ)'
-__version__ = 'Beta 1.0'
+__version__ = 'Release 1.0'
 
 from openpyxl import load_workbook
 import shutil
@@ -11,6 +11,7 @@ if __name__ == '__main__':
         try:
             path = input('输入文件路径：').strip().strip('"\'')
             wb = load_workbook(path)
+            wb.guess_types = True
             shutil.copyfile(path, path + '.bak')
             print('原文件已备份至 ' + path + '.bak')
         except FileNotFoundError as e:
@@ -55,22 +56,22 @@ if __name__ == '__main__':
             print('已导入数据：{}号 {}'.format(cell.value, objects[str(cell.value)]['name']))
 
     # Choose header.
+    save = True
     def choose_header():
         headers = {}
         for cell_h in ws[num_header.row]:
             if cell_h.column > num_header.offset(column=1).column:
                 headers[cell_h.value] = cell_h.column
         current = input('请选择待输入列（输入一个不同于列表中的列来新建一列）{}：'.format(list(headers.keys())))
-        if current in headers:
-            current = headers[current]
-        else:
-            ws[num_header.row][-1].offset(column=1).value = current
-            headers[current] = ws[num_header.row][-1].offset(column=1).column
-            current = headers[current]
+        if current not in headers:
+            global save
+            save = False
+            choice = ws[num_header.row][-1].offset(column=1)
+            choice.value = current
+            headers[current] = choice.column
+        current = headers[current]
         return current
     header = choose_header()
-
-    save = True
 
     # Main loop.
     while True:
@@ -100,8 +101,6 @@ if __name__ == '__main__':
         elif re.match(r'[^,\s]+(,[^,\s]+)* \S+', c):
             numbers = c.split()[0].split(',')
             value = c.split()[1]
-            if value.isnumeric():
-                value = int(value)
             for n in numbers:
                 if not objects.get(n):
                     for k in objects:
