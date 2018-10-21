@@ -1,9 +1,10 @@
-__author__ = 'FiftysixTimes7(PTJ)'
-__version__ = 'Release 1.0'
-
 from openpyxl import load_workbook
 import shutil
 import re
+
+
+__author__ = 'FiftysixTimes7(PTJ)'
+__version__ = 'Release 1.0'
 
 if __name__ == '__main__':
     # Input file.
@@ -52,17 +53,21 @@ if __name__ == '__main__':
     objects = {}
     for cell in ws[num_header.column]:
         if isinstance(cell.value, int):
-            objects[str(cell.value)] = {'name': cell.offset(column=1).value, 'row': str(cell.row)}
-            print('已导入数据：{}号 {}'.format(cell.value, objects[str(cell.value)]['name']))
+            objects[str(cell.value)] = {'name': cell.offset(
+                column=1).value, 'row': str(cell.row)}
+            print('已导入数据：{}号 {}'.format(cell.value,
+                                        objects[str(cell.value)]['name']))
 
     # Choose header.
     save = True
+
     def choose_header():
         headers = {}
         for cell_h in ws[num_header.row]:
             if cell_h.column > num_header.offset(column=1).column:
                 headers[cell_h.value] = cell_h.column
-        current = input('请选择待输入列（输入一个不同于列表中的列来新建一列）{}：'.format(list(headers.keys())))
+        current = input(
+            '请选择待输入列（输入一个不同于列表中的列来新建一列）{}：'.format(list(headers.keys())))
         if current not in headers:
             global save
             save = False
@@ -97,7 +102,8 @@ if __name__ == '__main__':
             save = True
         elif c == 'p':
             for k in objects:
-                print('{}号 {}：{}'.format(k, objects[k]['name'], ws[header + objects[k]['row']].value))
+                print('{}号 {}：{}'.format(k, objects[k]['name'],
+                                         ws[header + objects[k]['row']].value))
         elif re.match(r'[^,\s]+(,[^,\s]+)* \S+', c):
             numbers = c.split()[0].split(',')
             value = c.split()[1]
