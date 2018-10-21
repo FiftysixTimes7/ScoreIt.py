@@ -1,7 +1,6 @@
-from openpyxl import load_workbook
-import shutil
 import re
-
+import shutil
+from openpyxl import load_workbook
 
 __author__ = 'FiftysixTimes7(PTJ)'
 __version__ = 'Release 1.0'
@@ -41,7 +40,7 @@ if __name__ == '__main__':
     for column in ws.columns:
         for cell in column:
             if cell.value == '序号' or cell.value == '学号':
-                num_header = cell
+                order = cell
                 break
         else:
             continue
@@ -51,7 +50,7 @@ if __name__ == '__main__':
 
     # Assign ordinal and name with row name.
     objects = {}
-    for cell in ws[num_header.column]:
+    for cell in ws[order.column]:
         if isinstance(cell.value, int):
             objects[str(cell.value)] = {'name': cell.offset(
                 column=1).value, 'row': str(cell.row)}
@@ -63,20 +62,20 @@ if __name__ == '__main__':
 
     def choose_header():
         headers = {}
-        for cell_h in ws[num_header.row]:
-            if cell_h.column > num_header.offset(column=1).column:
+        for cell_h in ws[order.row]:
+            if cell_h.column > order.offset(column=1).column:
                 headers[cell_h.value] = cell_h.column
         current = input(
             '请选择待输入列（输入一个不同于列表中的列来新建一列）{}：'.format(list(headers.keys())))
         if current not in headers:
             global save
             save = False
-            choice = ws[num_header.row][-1].offset(column=1)
+            choice = ws[order.row][-1].offset(column=1)
             choice.value = current
             headers[current] = choice.column
         current = headers[current]
         return current
-    header = choose_header()
+    output = choose_header()
 
     # Main loop.
     while True:
@@ -96,14 +95,14 @@ if __name__ == '__main__':
             else:
                 break
         elif c == 'c':
-            header = choose_header()
+            output = choose_header()
         elif c == 's':
             wb.save(path)
             save = True
         elif c == 'p':
             for k in objects:
                 print('{}号 {}：{}'.format(k, objects[k]['name'],
-                                         ws[header + objects[k]['row']].value))
+                                         ws[output + objects[k]['row']].value))
         elif re.match(r'[^,\s]+(,[^,\s]+)* \S+', c):
             numbers = c.split()[0].split(',')
             value = c.split()[1]
@@ -116,7 +115,7 @@ if __name__ == '__main__':
                     else:
                         print('无法查询')
                         break
-                ws[header + objects[n]['row']].value = value
+                ws[output + objects[n]['row']].value = value
                 print('已导入数据：{}号 {}：{}'.format(n, objects[n]['name'], value))
             save = False
         else:
